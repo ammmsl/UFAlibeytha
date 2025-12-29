@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UFAM | 2026 Strategy & Analytics</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; -webkit-tap-highlight-color: transparent; }
+        .card { @apply bg-white rounded-[2rem] shadow-sm border border-slate-200 p-8; }
+        .chart-wrapper { position: relative; height: 320px; width: 100%; }
+        .gradient-header { background: linear-gradient(135deg, #0f172a 0%, #1e40af 100%); }
+        
+        /* Ensure slider is truly full width */
+        input[type="range"] { 
+            @apply w-full h-3 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600;
+            display: block;
+        }
+    </style>
+</head>
+<body class="text-slate-900 pb-24">
+
+    <header class="gradient-header text-white py-16 px-6 text-center shadow-xl mb-10">
+        <h1 class="text-4xl md:text-5xl font-black mb-4 tracking-tight">UFA Libeytha?</h1>
+        <p class="text-blue-100 opacity-90 max-w-2xl mx-auto font-medium">Does it make sense to become a member of Ultimate Frisbee Association in 2026?</p>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 space-y-8">
+        
+        <section class="card">
+            <h2 class="text-xs font-bold text-slate-400 uppercase tracking-[0.3em] mb-8 text-center">Projected Annual Attendance</h2>
+            <div class="w-full bg-slate-50 p-6 md:p-10 rounded-3xl border border-slate-100">
+                <input type="range" id="sessionRange" min="1" max="83" value="20" step="1" class="w-full mb-6">
+                
+                <div class="grid grid-cols-3 items-center">
+                    <div class="text-[11px] text-slate-400 font-black uppercase tracking-widest">1 Session</div>
+                    
+                    <div class="text-center">
+                        <span class="text-4xl font-black text-blue-600 block leading-none" id="sessionDisplay">20</span>
+                        <div class="mt-1 mb-1">
+                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-tighter" id="monthlyDisplay">~1.7 sessions / month</span>
+                        </div>
+                        <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Sessions</span>
+                    </div>
+
+                    <div class="text-right text-[11px] text-slate-400 font-black uppercase tracking-widest">83 Max</div>
+                </div>
+            </div>
+        </section>
+
+        <div id="statusIndicator" class="rounded-[3rem] p-2 transition-all duration-700 bg-slate-200 shadow-2xl">
+            <div class="bg-white rounded-[2.8rem] p-8 md:p-12">
+                <div class="grid lg:grid-cols-5 gap-12 items-center">
+                    <div class="lg:col-span-2">
+                        <h3 id="statusTitle" class="text-3xl font-black mb-4">Analysing...</h3>
+                        <p id="statusMsg" class="text-slate-500 leading-relaxed font-medium"></p>
+                    </div>
+                    
+                    <div class="lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+                        <div class="p-8 rounded-[2rem] bg-slate-50 border border-slate-100">
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Guest Total Expense</p>
+                            <p id="guestValue" class="text-4xl font-black text-slate-800">MVR 0</p>
+                            <p class="text-xs text-slate-400 mt-3 font-semibold italic">Based on MVR 25 surcharge</p>
+                        </div>
+                        <div class="p-8 rounded-[2rem] bg-blue-50 border border-blue-100">
+                            <p class="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] mb-2">Member Total Expense</p>
+                            <p id="memberValue" class="text-4xl font-black text-blue-700">MVR 0</p>
+                            <p class="text-xs text-blue-500 mt-3 font-bold uppercase">Incl. MVR 250 Membership Fee</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <section class="card">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
+                <div>
+                    <h3 class="font-black text-2xl text-slate-800">Per Session Cost Efficiency</h3>
+                    <p class="text-sm text-slate-400 font-medium italic">Comparison based on the Number of Players attending.</p>
+                </div>
+                <div class="flex flex-wrap gap-3">
+                    <div class="bg-red-50 border border-red-100 p-4 rounded-2xl">
+                        <span class="block text-[10px] font-black text-red-400 uppercase mb-1">Highest Expected (14 pax)</span>
+                        <div class="flex items-baseline gap-3">
+                            <div>
+                                <span class="text-lg font-black text-red-600">MVR 60</span>
+                                <span class="text-[9px] font-bold text-red-400">/Mem</span>
+                            </div>
+                            <div class="w-[1px] h-4 bg-red-200"></div>
+                            <div>
+                                <span class="text-lg font-black text-red-600">MVR 75</span>
+                                <span class="text-[9px] font-bold text-red-400">/Guest</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-emerald-50 border border-emerald-100 p-4 rounded-2xl">
+                        <span class="block text-[10px] font-black text-emerald-400 uppercase mb-1">Average (20 pax)</span>
+                        <div class="flex items-baseline gap-3">
+                            <div>
+                                <span class="text-lg font-black text-emerald-600">MVR 45</span>
+                                <span class="text-[9px] font-bold text-emerald-400">/Mem</span>
+                            </div>
+                            <div class="w-[1px] h-4 bg-emerald-200"></div>
+                            <div>
+                                <span class="text-lg font-black text-emerald-600">MVR 60</span>
+                                <span class="text-[9px] font-bold text-emerald-400">/Guest</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="perPlayerChart"></canvas>
+            </div>
+        </section>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <section class="card">
+                <h3 class="font-black text-xl text-slate-800 mb-6">Annual Accumulation</h3>
+                <div class="chart-wrapper">
+                    <canvas id="growthChart"></canvas>
+                </div>
+            </section>
+
+            <section class="card">
+                <h3 class="font-black text-xl text-slate-800 mb-2">Attendance Distribution</h3>
+                <p class="text-[10px] text-slate-400 uppercase tracking-widest mb-6 font-bold">2-Player Bins (Historical Data)</p>
+                <div class="chart-wrapper">
+                    <canvas id="distChart"></canvas>
+                </div>
+            </section>
+        </div>
+
+    </main>
+
+    <script>
+        const COST_FIELD = 700;
+        const FEE_ANNUAL = 250;
+        const SURCHARGE_MEMBER = 10;
+        const SURCHARGE_GUEST = 25;
+        const AVG_PLAYERS = 20;
+
+        const bins = ["12-13", "14-15", "16-17", "18-19", "20-21", "22-23", "24-25", "26-27", "28-29", "30-31", "32-33", "34-35"];
+        const frequencies = [9, 8, 14, 9, 6, 12, 8, 3, 6, 3, 1, 1];
+
+        Chart.defaults.interaction.mode = 'index';
+        Chart.defaults.interaction.intersect = false;
+
+        let perPlayerChart, growthChart, distChart;
+
+        function refreshUI(sessions) {
+            const baseCost = COST_FIELD / AVG_PLAYERS;
+            const totalGuest = Math.round((baseCost + SURCHARGE_GUEST) * sessions);
+            const totalMember = Math.round(((baseCost + SURCHARGE_MEMBER) * sessions) + FEE_ANNUAL);
+            const delta = totalGuest - totalMember;
+
+            // Update Labels
+            document.getElementById('sessionDisplay').innerText = sessions;
+            const monthly = (sessions / 12).toFixed(1);
+            document.getElementById('monthlyDisplay').innerText = `~${monthly} sessions / month`;
+            
+            document.getElementById('guestValue').innerText = `MVR ${totalGuest.toLocaleString()}`;
+            document.getElementById('memberValue').innerText = `MVR ${totalMember.toLocaleString()}`;
+
+            const container = document.getElementById('statusIndicator');
+            const title = document.getElementById('statusTitle');
+            const msg = document.getElementById('statusMsg');
+
+            if (delta > 0) {
+                container.className = "rounded-[3rem] p-2 transition-all duration-700 bg-emerald-500 shadow-2xl shadow-emerald-100";
+                title.innerText = "Membership Wins! 🎉";
+                title.className = "text-3xl font-black mb-3 text-emerald-600";
+                msg.innerText = `You are saving MVR ${delta.toLocaleString()} per year compared to guest rates. At ${sessions} sessions, the membership fee is fully offset.`;
+            } else {
+                container.className = "rounded-[3rem] p-2 transition-all duration-700 bg-blue-600 shadow-2xl shadow-blue-100";
+                title.innerText = "Guest is Better 👟";
+                title.className = "text-3xl font-black mb-3 text-blue-600";
+                msg.innerText = `You are ${Math.abs(delta)} MVR away from the break-even point. Membership becomes cheaper once you attend more than 16 sessions.`;
+            }
+
+            updateGrowthPlot(sessions);
+        }
+
+        function initCharts() {
+            // 1. Per Player Chart (Range 14 - 40)
+            const pRange = Array.from({length: 27}, (_, i) => i + 14);
+            perPlayerChart = new Chart(document.getElementById('perPlayerChart'), {
+                type: 'line',
+                data: {
+                    labels: pRange,
+                    datasets: [
+                        { label: 'Member Cost', borderColor: '#10b981', backgroundColor: '#10b981', data: pRange.map(p => Math.round((COST_FIELD/p) + SURCHARGE_MEMBER)), tension: 0.4, pointRadius: 0, borderWidth: 5 },
+                        { label: 'Guest Cost', borderColor: '#3b82f6', backgroundColor: '#3b82f6', data: pRange.map(p => Math.round((COST_FIELD/p) + SURCHARGE_GUEST)), tension: 0.4, pointRadius: 0, borderWidth: 5 }
+                    ]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: { 
+                        y: { title: { display: true, text: 'MVR / Session' } },
+                        x: { title: { display: true, text: 'Players attending' } }
+                    },
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+
+            // 2. Growth Chart
+            const sRange = Array.from({length: 43}, (_, i) => i * 2);
+            growthChart = new Chart(document.getElementById('growthChart'), {
+                type: 'line',
+                data: {
+                    labels: sRange,
+                    datasets: [
+                        { label: 'Member Total', borderColor: '#10b981', data: [], tension: 0.2, pointRadius: 0, borderWidth: 3 },
+                        { label: 'Guest Total', borderColor: '#3b82f6', data: [], tension: 0.2, pointRadius: 0, borderWidth: 3 }
+                    ]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+
+            // 3. Distribution Chart
+            distChart = new Chart(document.getElementById('distChart'), {
+                type: 'bar',
+                data: {
+                    labels: bins,
+                    datasets: [{ label: 'Sessions', data: frequencies, backgroundColor: '#6366f1', borderRadius: 12 }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true } }
+                }
+            });
+        }
+
+        function updateGrowthPlot(currentS) {
+            const labels = Array.from({length: 43}, (_, i) => i * 2);
+            const base = COST_FIELD / AVG_PLAYERS;
+            growthChart.data.datasets[0].data = labels.map(s => (s * (base + SURCHARGE_MEMBER)) + FEE_ANNUAL);
+            growthChart.data.datasets[1].data = labels.map(s => s * (base + SURCHARGE_GUEST));
+            growthChart.update('none');
+        }
+
+        const slider = document.getElementById('sessionRange');
+        slider.addEventListener('input', (e) => refreshUI(parseInt(e.target.value)));
+
+        initCharts();
+        refreshUI(20);
+    </script>
+</body>
+</html>
