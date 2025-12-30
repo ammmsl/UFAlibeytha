@@ -4,70 +4,217 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UFA | 2026 Strategy & Analytics</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; -webkit-tap-highlight-color: transparent; }
-        .card { @apply bg-white rounded-[2rem] shadow-sm border border-slate-200 p-8; }
-        .chart-wrapper { position: relative; height: 320px; width: 100%; }
-        .gradient-header { background: linear-gradient(135deg, #0f172a 0%, #1e40af 100%); }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         
-        /* Ensure slider is truly full width */
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #f8fafc; 
+            -webkit-tap-highlight-color: transparent;
+            color: #0f172a;
+            /* Prevent horizontal scrolling on the entire page */
+            overflow-x: hidden;
+            width: 100%;
+        }
+
+        /* Ensure all containers and cards can shrink smaller than their content 
+           This is the primary fix for the CSS Grid / Chart.js overflow bug */
+        .container, .card, .charts-grid, .chart-wrapper {
+            min-width: 0;
+        }
+
+        canvas {
+            max-width: 100% !important;
+        }
+
+        .card { 
+            background-color: white;
+            border-radius: 2rem;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+            border: 1px solid #e2e8f0;
+            padding: 2rem;
+        }
+
+        .chart-wrapper { position: relative; height: 320px; width: 100%; }
+
+        .gradient-header { 
+            background: linear-gradient(135deg, #0f172a 0%, #1e40af 100%);
+            color: white;
+            padding: 4rem 1.5rem;
+            text-align: center;
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+            margin-bottom: 2.5rem;
+        }
+        
         input[type="range"] { 
-            @apply w-full h-3 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600;
+            width: 100%;
+            height: 0.75rem;
+            background-color: #e2e8f0;
+            border-radius: 0.5rem;
+            appearance: none;
+            cursor: pointer;
+            accent-color: #2563eb;
             display: block;
+        }
+        
+        .container { max-width: 72rem; margin: 0 auto; padding: 0 1rem; width: 100%; }
+        .space-y-8 > * + * { margin-top: 2rem; }
+        .grid { display: grid; gap: 1rem; }
+        .grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .uppercase { text-transform: uppercase; }
+        .font-black { font-weight: 900; }
+        .font-bold { font-weight: 700; }
+        .font-semibold { font-weight: 600; }
+        .font-medium { font-weight: 500; }
+        .italic { font-style: italic; }
+        .leading-relaxed { line-height: 1.625; }
+        .leading-none { line-height: 1; }
+        .tracking-tight { letter-spacing: -0.025em; }
+        .tracking-widest { letter-spacing: 0.1em; }
+        .tracking-tighter { letter-spacing: -0.05em; }
+        .flex { display: flex; }
+        .flex-wrap { flex-wrap: wrap; }
+        .items-center { align-items: center; }
+        .items-baseline { align-items: baseline; }
+        .justify-between { justify-content: space-between; }
+        .gap-2 { gap: 0.5rem; }
+        .gap-3 { gap: 0.75rem; }
+        .gap-6 { gap: 1.5rem; }
+        .mb-1 { margin-bottom: 0.25rem; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-3 { margin-bottom: 0.75rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .mb-6 { margin-bottom: 1.5rem; }
+        .mb-8 { margin-bottom: 2rem; }
+        .mb-10 { margin-bottom: 2.5rem; }
+        .mt-1 { margin-top: 0.25rem; }
+        .mt-2 { margin-top: 0.5rem; }
+        .mt-3 { margin-top: 0.75rem; }
+        .pb-24 { padding-bottom: 6rem; }
+        
+        /* Mobile responsive adjustments */
+        @media (max-width: 768px) {
+            .card { 
+                padding: 1.25rem;
+                border-radius: 1.25rem;
+            }
+            .chart-wrapper { height: 260px; }
+            #statusIndicator { 
+                border-radius: 1.25rem;
+                padding: 0.25rem;
+                margin-bottom: 1rem;
+            }
+            #statusIndicator > div { 
+                border-radius: 1.1rem;
+                padding: 1.25rem;
+            }
+            .gradient-header {
+                padding: 3rem 1rem;
+            }
+            .status-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            .status-text {
+                margin-bottom: 0.5rem;
+            }
+            .expense-cards {
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+                gap: 0.75rem;
+            }
+            .expense-card {
+                padding: 0.75rem !important;
+            }
+            .grid-lg-5 {
+                grid-template-columns: 1fr;
+            }
+            .charts-grid {
+                grid-template-columns: 1fr !important;
+            }
+        }
+        
+        @media (min-width: 640px) {
+            .sm-grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+        
+        @media (min-width: 1024px) {
+            .lg-grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .lg-col-span-2 { grid-column: span 2 / span 2; }
+            .lg-col-span-3 { grid-column: span 3 / span 3; }
+            .grid-lg-5 { grid-template-columns: 2fr 3fr; gap: 3rem; }
+            .status-grid { grid-template-columns: 2fr 3fr; gap: 3rem; }
+            .expense-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .charts-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+        }
+        
+        @media (min-width: 768px) {
+            .md-flex-row { flex-direction: row; }
+            .md-items-center { align-items: center; }
+            .card { padding: 2.5rem; border-radius: 2rem; }
+            #statusIndicator { 
+                border-radius: 3rem;
+                padding: 0.5rem;
+            }
+            #statusIndicator > div { 
+                border-radius: 2.8rem;
+                padding: 3rem;
+            }
         }
     </style>
 </head>
-<body class="text-slate-900 pb-24">
+<body class="pb-24">
 
-    <header class="gradient-header text-white py-16 px-6 text-center shadow-xl mb-10">
-        <h1 class="text-4xl md:text-5xl font-black mb-4 tracking-tight">UFA Libeytha?</h1>
-        <p class="text-blue-100 opacity-90 max-w-2xl mx-auto font-medium">Does it make sense to become a member of Ultimate Frisbee Association in 2026? Select how many sessions you think you can make, See how much it costs</p>
+    <header class="gradient-header">
+        <h1 style="font-size: clamp(1.875rem, 5vw, 3rem); font-weight: 900; margin-bottom: 0.75rem; letter-spacing: -0.025em;">UFA Libeytha?</h1>
+        <p style="font-size: clamp(0.875rem, 2vw, 1rem); color: #bfdbfe; opacity: 0.9; max-width: 42rem; margin: 0 auto; font-weight: 500;">Does it make sense to become a member of Ultimate Frisbee Association in 2026? See how much it costs.</p>
     </header>
 
-    <main class="max-w-6xl mx-auto px-4 space-y-8">
+    <main class="container space-y-8">
         
         <section class="card">
-            <h2 class="text-xs font-bold text-slate-400 uppercase tracking-[0.3em] mb-8 text-center">Projected Annual Attendance</h2>
-            <div class="w-full bg-slate-50 p-6 md:p-10 rounded-3xl border border-slate-100">
-                <input type="range" id="sessionRange" min="1" max="83" value="20" step="1" class="w-full mb-6">
+            <h2 style="font-size: 0.75rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.3em; margin-bottom: 2rem; text-align: center;">Projected Annual Attendance</h2>
+            <div style="width: 100%; background-color: #f8fafc; padding: 1rem; border-radius: 1.5rem; border: 1px solid #f1f5f9;">
+                <input type="range" id="sessionRange" min="1" max="83" value="20" step="1" style="margin-bottom: 1rem;">
                 
-                <div class="grid grid-cols-3 items-center">
-                    <div class="text-[11px] text-slate-400 font-black uppercase tracking-widest">1 Session</div>
+                <div class="grid grid-cols-3 items-center gap-2">
+                    <div style="font-size: 0.6875rem; color: #94a3b8; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em;">1 Session</div>
                     
                     <div class="text-center">
-                        <span class="text-4xl font-black text-blue-600 block leading-none" id="sessionDisplay">20</span>
+                        <span style="font-size: clamp(1.875rem, 5vw, 2.25rem); font-weight: 900; color: #2563eb; display: block; line-height: 1;" id="sessionDisplay">20</span>
                         <div class="mt-1 mb-1">
-                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-tighter" id="monthlyDisplay">~1.7 sessions / month</span>
+                            <span style="font-size: 0.625rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: -0.05em;" id="frequencyDisplay">~2x/week</span>
                         </div>
-                        <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Sessions</span>
+                        <span style="font-size: 0.625rem; font-weight: 900; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em;">Total Sessions</span>
                     </div>
 
-                    <div class="text-right text-[11px] text-slate-400 font-black uppercase tracking-widest">83 Max</div>
+                    <div style="text-align: right; font-size: 0.6875rem; color: #94a3b8; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em;">83 Max</div>
                 </div>
             </div>
         </section>
 
-        <div id="statusIndicator" class="rounded-[3rem] p-2 transition-all duration-700 bg-slate-200 shadow-2xl">
-            <div class="bg-white rounded-[2.8rem] p-8 md:p-12">
-                <div class="grid lg:grid-cols-5 gap-12 items-center">
-                    <div class="lg:col-span-2">
-                        <h3 id="statusTitle" class="text-3xl font-black mb-4">Analysing...</h3>
-                        <p id="statusMsg" class="text-slate-500 leading-relaxed font-medium"></p>
+        <div id="statusIndicator" style="border-radius: 1.5rem; padding: 0.25rem; transition: all 0.7s; background-color: #e2e8f0; box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);">
+            <div style="background-color: white; border-radius: 1.25rem; padding: 1rem;">
+                <div class="status-grid" style="display: grid; align-items: center;">
+                    <div class="status-text">
+                        <h3 id="statusTitle" style="font-size: clamp(1.25rem, 4vw, 1.875rem); font-weight: 900; margin-bottom: 0.5rem;">Analysing...</h3>
+                        <p id="statusMsg" style="font-size: clamp(0.75rem, 2vw, 0.875rem); color: #64748b; line-height: 1.625; font-weight: 500;"></p>
                     </div>
                     
-                    <div class="lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
-                        <div class="p-8 rounded-[2rem] bg-slate-50 border border-slate-100">
-                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Guest Total Expense</p>
-                            <p id="guestValue" class="text-4xl font-black text-slate-800">MVR 0</p>
-                            <p class="text-xs text-slate-400 mt-3 font-semibold italic">Based on MVR 25 surcharge</p>
+                    <div class="expense-cards" style="display: grid; gap: 0.75rem; width: 100%;">
+                        <div class="expense-card" style="padding: 1rem; border-radius: 1rem; background-color: #f8fafc; border: 1px solid #e2e8f0;">
+                            <p style="font-size: 0.625rem; font-weight: 900; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 0.5rem;">Guest Total</p>
+                            <p id="guestValue" style="font-size: clamp(1.5rem, 4vw, 2.25rem); font-weight: 900; color: #1e293b;">MVR 0</p>
+                            <p style="font-size: 0.625rem; color: #94a3b8; margin-top: 0.5rem; font-weight: 600; font-style: italic;">MVR 25 surcharge</p>
                         </div>
-                        <div class="p-8 rounded-[2rem] bg-blue-50 border border-blue-100">
-                            <p class="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em] mb-2">Member Total Expense</p>
-                            <p id="memberValue" class="text-4xl font-black text-blue-700">MVR 0</p>
-                            <p class="text-xs text-blue-500 mt-3 font-bold uppercase">Incl. MVR 250 Membership Fee</p>
+                        <div class="expense-card" style="padding: 1rem; border-radius: 1rem; background-color: #eff6ff; border: 1px solid #dbeafe;">
+                            <p style="font-size: 0.625rem; font-weight: 900; color: #93c5fd; text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 0.5rem;">Member Total</p>
+                            <p id="memberValue" style="font-size: clamp(1.5rem, 4vw, 2.25rem); font-weight: 900; color: #1d4ed8;">MVR 0</p>
+                            <p style="font-size: 0.625rem; color: #3b82f6; margin-top: 0.5rem; font-weight: 700; text-transform: uppercase;">+MVR 250 Fee</p>
                         </div>
                     </div>
                 </div>
@@ -75,37 +222,37 @@
         </div>
 
         <section class="card">
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
+            <div style="display: flex; flex-direction: column; justify-content: space-between; align-items: flex-start; gap: 1.5rem; margin-bottom: 2.5rem;">
                 <div>
-                    <h3 class="font-black text-2xl text-slate-800">Per Session Cost Efficiency</h3>
-                    <p class="text-sm text-slate-400 font-medium italic">Comparison based on the Number of Players attending.</p>
+                    <h3 style="font-weight: 900; font-size: clamp(1.125rem, 3vw, 1.5rem); color: #1e293b;">Per Session Cost Efficiency</h3>
+                    <p style="font-size: clamp(0.75rem, 2vw, 0.875rem); color: #94a3b8; font-weight: 500; font-style: italic;">Comparison based on the Number of Players attending.</p>
                 </div>
                 <div class="flex flex-wrap gap-3">
-                    <div class="bg-red-50 border border-red-100 p-4 rounded-2xl">
-                        <span class="block text-[10px] font-black text-red-400 uppercase mb-1">Highest Expected (14 pax)</span>
-                        <div class="flex items-baseline gap-3">
+                    <div style="background-color: #fef2f2; border: 1px solid #fecaca; padding: 0.75rem; border-radius: 1rem;">
+                        <span style="display: block; font-size: 0.625rem; font-weight: 900; color: #f87171; text-transform: uppercase; margin-bottom: 0.25rem;">Highest (14 pax)</span>
+                        <div class="flex items-baseline gap-2">
                             <div>
-                                <span class="text-lg font-black text-red-600">MVR 60</span>
-                                <span class="text-[9px] font-bold text-red-400">/Mem</span>
+                                <span style="font-size: 1rem; font-weight: 900; color: #dc2626;">MVR 60</span>
+                                <span style="font-size: 0.5625rem; font-weight: 700; color: #f87171;">/Mem</span>
                             </div>
-                            <div class="w-[1px] h-4 bg-red-200"></div>
+                            <div style="width: 1px; height: 1rem; background-color: #fecaca;"></div>
                             <div>
-                                <span class="text-lg font-black text-red-600">MVR 75</span>
-                                <span class="text-[9px] font-bold text-red-400">/Guest</span>
+                                <span style="font-size: 1rem; font-weight: 900; color: #dc2626;">MVR 75</span>
+                                <span style="font-size: 0.5625rem; font-weight: 700; color: #f87171;">/Guest</span>
                             </div>
                         </div>
                     </div>
-                    <div class="bg-emerald-50 border border-emerald-100 p-4 rounded-2xl">
-                        <span class="block text-[10px] font-black text-emerald-400 uppercase mb-1">Average (20 pax)</span>
-                        <div class="flex items-baseline gap-3">
+                    <div style="background-color: #ecfdf5; border: 1px solid #a7f3d0; padding: 0.75rem; border-radius: 1rem;">
+                        <span style="display: block; font-size: 0.625rem; font-weight: 900; color: #34d399; text-transform: uppercase; margin-bottom: 0.25rem;">Average (20 pax)</span>
+                        <div class="flex items-baseline gap-2">
                             <div>
-                                <span class="text-lg font-black text-emerald-600">MVR 45</span>
-                                <span class="text-[9px] font-bold text-emerald-400">/Mem</span>
+                                <span style="font-size: 1rem; font-weight: 900; color: #059669;">MVR 45</span>
+                                <span style="font-size: 0.5625rem; font-weight: 700; color: #34d399;">/Mem</span>
                             </div>
-                            <div class="w-[1px] h-4 bg-emerald-200"></div>
+                            <div style="width: 1px; height: 1rem; background-color: #a7f3d0;"></div>
                             <div>
-                                <span class="text-lg font-black text-emerald-600">MVR 60</span>
-                                <span class="text-[9px] font-bold text-emerald-400">/Guest</span>
+                                <span style="font-size: 1rem; font-weight: 900; color: #059669;">MVR 60</span>
+                                <span style="font-size: 0.5625rem; font-weight: 700; color: #34d399;">/Guest</span>
                             </div>
                         </div>
                     </div>
@@ -116,17 +263,17 @@
             </div>
         </section>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div class="charts-grid" style="display: grid; gap: 2rem;">
             <section class="card">
-                <h3 class="font-black text-xl text-slate-800 mb-6">Annual Accumulation</h3>
+                <h3 style="font-weight: 900; font-size: clamp(1rem, 3vw, 1.25rem); color: #1e293b; margin-bottom: 1.5rem;">Annual Accumulation</h3>
                 <div class="chart-wrapper">
                     <canvas id="growthChart"></canvas>
                 </div>
             </section>
 
             <section class="card">
-                <h3 class="font-black text-xl text-slate-800 mb-2">Attendance Distribution</h3>
-                <p class="text-[10px] text-slate-400 uppercase tracking-widest mb-6 font-bold">2-Player Bins (Historical Data)</p>
+                <h3 style="font-weight: 900; font-size: clamp(1rem, 3vw, 1.25rem); color: #1e293b; margin-bottom: 0.5rem;">Attendance Distribution</h3>
+                <p style="font-size: 0.625rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 1.5rem; font-weight: 700;">2-Player Bins (Historical Data)</p>
                 <div class="chart-wrapper">
                     <canvas id="distChart"></canvas>
                 </div>
@@ -156,11 +303,28 @@
             const totalMember = Math.round(((baseCost + SURCHARGE_MEMBER) * sessions) + FEE_ANNUAL);
             const delta = totalGuest - totalMember;
 
-            // Update Labels
             document.getElementById('sessionDisplay').innerText = sessions;
-            const monthly = (sessions / 12).toFixed(1);
-            document.getElementById('monthlyDisplay').innerText = `~${monthly} sessions / month`;
             
+            const perWeek = sessions / 52;
+            let frequencyText;
+            
+            if (perWeek < 0.5) {
+                const perMonth = Math.round(sessions / 12);
+                frequencyText = perMonth === 0 ? "~1x every few months" : `~${perMonth}x/month`;
+            } else if (perWeek < 1) {
+                frequencyText = "~1x every 2 weeks";
+            } else if (perWeek < 1.5) {
+                frequencyText = "~1x/week";
+            } else if (perWeek < 2.5) {
+                frequencyText = "~2x/week";
+            } else if (perWeek < 3.5) {
+                frequencyText = "~3x/week";
+            } else {
+                const rounded = Math.round(perWeek);
+                frequencyText = `~${rounded}x/week`;
+            }
+            
+            document.getElementById('frequencyDisplay').innerText = frequencyText;
             document.getElementById('guestValue').innerText = `MVR ${totalGuest.toLocaleString()}`;
             document.getElementById('memberValue').innerText = `MVR ${totalMember.toLocaleString()}`;
 
@@ -169,22 +333,23 @@
             const msg = document.getElementById('statusMsg');
 
             if (delta > 0) {
-                container.className = "rounded-[3rem] p-2 transition-all duration-700 bg-emerald-500 shadow-2xl shadow-emerald-100";
+                container.style.backgroundColor = '#10b981';
+                container.style.boxShadow = '0 25px 50px -12px rgba(16, 185, 129, 0.25)';
                 title.innerText = "Membership Wins! 🎉";
-                title.className = "text-3xl font-black mb-3 text-emerald-600";
-                msg.innerText = `You are saving MVR ${delta.toLocaleString()} per year compared to guest rates. At ${sessions} sessions, the membership fee is fully offset.`;
+                title.style.color = '#059669';
+                msg.innerText = `You save MVR ${delta.toLocaleString()} per year vs guest rates. At ${sessions} sessions, membership pays off.`;
             } else {
-                container.className = "rounded-[3rem] p-2 transition-all duration-700 bg-blue-600 shadow-2xl shadow-blue-100";
+                container.style.backgroundColor = '#2563eb';
+                container.style.boxShadow = '0 25px 50px -12px rgba(37, 99, 235, 0.25)';
                 title.innerText = "Guest is Better 👟";
-                title.className = "text-3xl font-black mb-3 text-blue-600";
-                msg.innerText = `You are ${Math.abs(delta)} MVR away from the break-even point. Membership becomes cheaper once you attend more than 16 sessions.`;
+                title.style.color = '#2563eb';
+                msg.innerText = `You're MVR ${Math.abs(delta)} from break-even. Membership is cheaper after 16+ sessions.`;
             }
 
             updateGrowthPlot(sessions);
         }
 
         function initCharts() {
-            // 1. Per Player Chart (Range 14 - 40)
             const pRange = Array.from({length: 27}, (_, i) => i + 14);
             perPlayerChart = new Chart(document.getElementById('perPlayerChart'), {
                 type: 'line',
@@ -196,6 +361,7 @@
                     ]
                 },
                 options: {
+                    responsive: true,
                     maintainAspectRatio: false,
                     scales: { 
                         y: { title: { display: true, text: 'MVR / Session' } },
@@ -205,7 +371,6 @@
                 }
             });
 
-            // 2. Growth Chart
             const sRange = Array.from({length: 43}, (_, i) => i * 2);
             growthChart = new Chart(document.getElementById('growthChart'), {
                 type: 'line',
@@ -217,12 +382,12 @@
                     ]
                 },
                 options: {
+                    responsive: true,
                     maintainAspectRatio: false,
                     plugins: { legend: { position: 'bottom' } }
                 }
             });
 
-            // 3. Distribution Chart
             distChart = new Chart(document.getElementById('distChart'), {
                 type: 'bar',
                 data: {
@@ -230,6 +395,7 @@
                     datasets: [{ label: 'Sessions', data: frequencies, backgroundColor: '#6366f1', borderRadius: 12 }]
                 },
                 options: {
+                    responsive: true,
                     maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
                     scales: { y: { beginAtZero: true } }
